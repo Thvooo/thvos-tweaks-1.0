@@ -4,10 +4,11 @@
 function Show-Menu {
     Clear-Host
     Write-Host "============================================" -ForegroundColor Cyan
-    Write-Host "           THVO TWEAKS v1.0" -ForegroundColor Yellow
+    Write-Host "           THVO TWEAKS v2.0" -ForegroundColor Yellow
     Write-Host "       Windows 11 Optimization Tool" -ForegroundColor Yellow
     Write-Host "============================================" -ForegroundColor Cyan
     Write-Host ""
+    Write-Host "PERFORMANCE TWEAKS:" -ForegroundColor Magenta
     Write-Host "1.  Disable Unnecessary Services" -ForegroundColor Green
     Write-Host "2.  Disable Startup Programs" -ForegroundColor Green
     Write-Host "3.  Optimize Visual Effects" -ForegroundColor Green
@@ -17,10 +18,48 @@ function Show-Menu {
     Write-Host "7.  Disable Background Apps" -ForegroundColor Green
     Write-Host "8.  Clean Temp Files" -ForegroundColor Green
     Write-Host "9.  Disable Game Bar & Xbox Features" -ForegroundColor Green
-    Write-Host "10. Restore Classic Right-Click Menu" -ForegroundColor Green
-    Write-Host "11. Disable Widgets & News Feed" -ForegroundColor Green
-    Write-Host "12. Run All Tweaks" -ForegroundColor Magenta
-    Write-Host "13. Restore Default Settings" -ForegroundColor Yellow
+    Write-Host "10. Kill Unnecessary Background Processes" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "ADVANCED TWEAKS:" -ForegroundColor Magenta
+    Write-Host "11. Disable Windows Animations" -ForegroundColor Green
+    Write-Host "12. Disable Transparency Effects" -ForegroundColor Green
+    Write-Host "13. Disable Cortana" -ForegroundColor Green
+    Write-Host "14. Disable OneDrive" -ForegroundColor Green
+    Write-Host "15. Disable Windows Update (Manual Only)" -ForegroundColor Green
+    Write-Host "16. Disable Hibernation (Free Space)" -ForegroundColor Green
+    Write-Host "17. Optimize SSD (Disable Defrag)" -ForegroundColor Green
+    Write-Host "18. Disable Print Spooler" -ForegroundColor Green
+    Write-Host "19. Disable Windows Error Reporting" -ForegroundColor Green
+    Write-Host "20. Disable Remote Assistance" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "KEYBOARD & MOUSE TWEAKS:" -ForegroundColor Magenta
+    Write-Host "21. Disable Sticky Keys" -ForegroundColor Green
+    Write-Host "22. Disable Filter Keys" -ForegroundColor Green
+    Write-Host "23. Disable Toggle Keys" -ForegroundColor Green
+    Write-Host "24. Set Keyboard Repeat Rate (Fast)" -ForegroundColor Green
+    Write-Host "25. Disable Mouse Acceleration" -ForegroundColor Green
+    Write-Host "26. Set Mouse Speed (Normal/No Enhancement)" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "INTERNET TWEAKS:" -ForegroundColor Magenta
+    Write-Host "27. Optimize DNS Cache" -ForegroundColor Green
+    Write-Host "28. Disable Network Throttling" -ForegroundColor Green
+    Write-Host "29. Optimize TCP/IP Settings" -ForegroundColor Green
+    Write-Host "30. Disable Windows Auto-Tuning" -ForegroundColor Green
+    Write-Host "31. Set Google DNS (8.8.8.8)" -ForegroundColor Green
+    Write-Host "32. Disable Large Send Offload" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "UI TWEAKS:" -ForegroundColor Magenta
+    Write-Host "33. Restore Classic Right-Click Menu" -ForegroundColor Green
+    Write-Host "34. Disable Widgets & News Feed" -ForegroundColor Green
+    Write-Host "35. Remove Chat Icon from Taskbar" -ForegroundColor Green
+    Write-Host "36. Show File Extensions" -ForegroundColor Green
+    Write-Host "37. Show Hidden Files" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "ALL-IN-ONE:" -ForegroundColor Magenta
+    Write-Host "88. Run All Performance Tweaks" -ForegroundColor Cyan
+    Write-Host "99. Run ALL Tweaks (Complete Optimization)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "90. Restore Default Settings" -ForegroundColor Yellow
     Write-Host "0.  Exit" -ForegroundColor Red
     Write-Host ""
     Write-Host "============================================" -ForegroundColor Cyan
@@ -31,13 +70,28 @@ function Test-Admin {
     return $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+# PERFORMANCE TWEAKS
+
 function Disable-UnnecessaryServices {
     Write-Host "`nDisabling unnecessary services..." -ForegroundColor Yellow
     $services = @(
         "DiagTrack",                # Connected User Experiences and Telemetry
         "dmwappushservice",         # WAP Push Message Routing Service
         "SysMain",                  # Superfetch
-        "WSearch"                   # Windows Search
+        "WSearch",                  # Windows Search
+        "TabletInputService",       # Touch Keyboard and Handwriting Panel
+        "XblAuthManager",           # Xbox Live Auth Manager
+        "XblGameSave",              # Xbox Live Game Save
+        "XboxGipSvc",               # Xbox Accessory Management
+        "XboxNetApiSvc",            # Xbox Live Networking
+        "Fax",                      # Fax Service
+        "MapsBroker",               # Downloaded Maps Manager
+        "lfsvc",                    # Geolocation Service
+        "SharedAccess",             # Internet Connection Sharing
+        "RemoteRegistry",           # Remote Registry
+        "RetailDemo",               # Retail Demo Service
+        "WerSvc",                   # Windows Error Reporting
+        "WMPNetworkSvc"             # Windows Media Player Network Sharing
     )
     
     foreach ($service in $services) {
@@ -71,6 +125,9 @@ function Optimize-VisualEffects {
 function Disable-Telemetry {
     Write-Host "`nDisabling telemetry and data collection..." -ForegroundColor Yellow
     
+    if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection")) {
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force | Out-Null
+    }
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name AllowTelemetry -Value 0 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name AllowTelemetry -Value 0 -ErrorAction SilentlyContinue
     
@@ -98,6 +155,7 @@ function Set-HighPerformancePower {
 function Disable-BackgroundApps {
     Write-Host "`nDisabling background apps..." -ForegroundColor Yellow
     $path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
+    if (!(Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
     Set-ItemProperty -Path $path -Name GlobalUserDisabled -Value 1 -ErrorAction SilentlyContinue
     Write-Host "  [✓] Background apps disabled" -ForegroundColor Green
 }
@@ -133,25 +191,236 @@ function Disable-GameBar {
     Write-Host "  [✓] Game Bar and Xbox features disabled" -ForegroundColor Green
 }
 
+function Kill-BackgroundProcesses {
+    Write-Host "`nKilling unnecessary background processes..." -ForegroundColor Yellow
+    
+    $processesToKill = @(
+        "OneDrive",
+        "msedge",
+        "MicrosoftEdgeUpdate",
+        "CompatTelRunner",
+        "SgrmBroker",
+        "SecurityHealthService"
+    )
+    
+    foreach ($proc in $processesToKill) {
+        Get-Process -Name $proc -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+        if ($?) {
+            Write-Host "  [✓] Killed $proc" -ForegroundColor Green
+        }
+    }
+    
+    Write-Host "  [✓] Background processes cleaned" -ForegroundColor Green
+}
+
+# ADVANCED TWEAKS
+
+function Disable-WindowsAnimations {
+    Write-Host "`nDisabling Windows animations..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name MinAnimate -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name TaskbarAnimations -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Animations disabled" -ForegroundColor Green
+}
+
+function Disable-Transparency {
+    Write-Host "`nDisabling transparency effects..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name EnableTransparency -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Transparency disabled" -ForegroundColor Green
+}
+
+function Disable-Cortana {
+    Write-Host "`nDisabling Cortana..." -ForegroundColor Yellow
+    if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search")) {
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name AllowCortana -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Cortana disabled" -ForegroundColor Green
+}
+
+function Disable-OneDrive {
+    Write-Host "`nDisabling OneDrive..." -ForegroundColor Yellow
+    
+    Stop-Process -Name OneDrive -Force -ErrorAction SilentlyContinue
+    
+    if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive")) {
+        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name DisableFileSyncNGSC -Value 1 -ErrorAction SilentlyContinue
+    
+    Write-Host "  [✓] OneDrive disabled" -ForegroundColor Green
+}
+
+function Set-WindowsUpdateManual {
+    Write-Host "`nSetting Windows Update to Manual..." -ForegroundColor Yellow
+    Set-Service -Name wuauserv -StartupType Manual -ErrorAction SilentlyContinue
+    Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Windows Update set to Manual" -ForegroundColor Green
+    Write-Host "  [!] Warning: Remember to manually check for updates!" -ForegroundColor Red
+}
+
+function Disable-Hibernation {
+    Write-Host "`nDisabling hibernation..." -ForegroundColor Yellow
+    powercfg -h off
+    Write-Host "  [✓] Hibernation disabled (disk space freed)" -ForegroundColor Green
+}
+
+function Optimize-SSD {
+    Write-Host "`nOptimizing for SSD..." -ForegroundColor Yellow
+    Disable-ScheduledTask -TaskName "Microsoft\Windows\Defrag\ScheduledDefrag" -ErrorAction SilentlyContinue
+    Write-Host "  [✓] SSD optimization enabled" -ForegroundColor Green
+}
+
+function Disable-PrintSpooler {
+    Write-Host "`nDisabling Print Spooler..." -ForegroundColor Yellow
+    Stop-Service -Name Spooler -Force -ErrorAction SilentlyContinue
+    Set-Service -Name Spooler -StartupType Disabled -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Print Spooler disabled" -ForegroundColor Green
+}
+
+function Disable-ErrorReporting {
+    Write-Host "`nDisabling Windows Error Reporting..." -ForegroundColor Yellow
+    Stop-Service -Name WerSvc -Force -ErrorAction SilentlyContinue
+    Set-Service -Name WerSvc -StartupType Disabled -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Error Reporting disabled" -ForegroundColor Green
+}
+
+function Disable-RemoteAssistance {
+    Write-Host "`nDisabling Remote Assistance..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name fAllowToGetHelp -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Remote Assistance disabled" -ForegroundColor Green
+}
+
+# KEYBOARD & MOUSE TWEAKS
+
+function Disable-StickyKeys {
+    Write-Host "`nDisabling Sticky Keys..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Accessibility\StickyKeys" -Name Flags -Value 506 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Sticky Keys disabled" -ForegroundColor Green
+}
+
+function Disable-FilterKeys {
+    Write-Host "`nDisabling Filter Keys..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Accessibility\Keyboard Response" -Name Flags -Value 122 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Filter Keys disabled" -ForegroundColor Green
+}
+
+function Disable-ToggleKeys {
+    Write-Host "`nDisabling Toggle Keys..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Accessibility\ToggleKeys" -Name Flags -Value 58 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Toggle Keys disabled" -ForegroundColor Green
+}
+
+function Set-KeyboardRepeatRate {
+    Write-Host "`nSetting keyboard repeat rate to fast..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name KeyboardDelay -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name KeyboardSpeed -Value 31 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Keyboard repeat rate optimized" -ForegroundColor Green
+}
+
+function Disable-MouseAcceleration {
+    Write-Host "`nDisabling mouse acceleration..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseSpeed -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseThreshold1 -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseThreshold2 -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Mouse acceleration disabled" -ForegroundColor Green
+}
+
+function Set-MouseSpeed {
+    Write-Host "`nSetting mouse speed (no enhancement)..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseSensitivity -Value 10 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Mouse speed set to normal (no enhancement)" -ForegroundColor Green
+}
+
+# INTERNET TWEAKS
+
+function Optimize-DNSCache {
+    Write-Host "`nOptimizing DNS cache..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name MaxCacheTtl -Value 86400 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name MaxNegativeCacheTtl -Value 900 -ErrorAction SilentlyContinue
+    ipconfig /flushdns | Out-Null
+    Write-Host "  [✓] DNS cache optimized" -ForegroundColor Green
+}
+
+function Disable-NetworkThrottling {
+    Write-Host "`nDisabling network throttling..." -ForegroundColor Yellow
+    if (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile")) {
+        New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name NetworkThrottlingIndex -Value 0xffffffff -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Network throttling disabled" -ForegroundColor Green
+}
+
+function Optimize-TCPIP {
+    Write-Host "`nOptimizing TCP/IP settings..." -ForegroundColor Yellow
+    netsh int tcp set global autotuninglevel=normal
+    netsh int tcp set global chimney=enabled
+    netsh int tcp set global dca=enabled
+    netsh int tcp set global netdma=enabled
+    netsh int tcp set global ecncapability=enabled
+    Write-Host "  [✓] TCP/IP optimized" -ForegroundColor Green
+}
+
+function Disable-AutoTuning {
+    Write-Host "`nDisabling Windows Auto-Tuning..." -ForegroundColor Yellow
+    netsh int tcp set global autotuninglevel=disabled
+    Write-Host "  [✓] Auto-Tuning disabled" -ForegroundColor Green
+}
+
+function Set-GoogleDNS {
+    Write-Host "`nSetting Google DNS (8.8.8.8)..." -ForegroundColor Yellow
+    $adapters = Get-NetAdapter | Where-Object {$_.Status -eq "Up"}
+    foreach ($adapter in $adapters) {
+        Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses ("8.8.8.8","8.8.4.4") -ErrorAction SilentlyContinue
+        Write-Host "  [✓] Set DNS for $($adapter.Name)" -ForegroundColor Green
+    }
+    Write-Host "  [✓] Google DNS configured" -ForegroundColor Green
+}
+
+function Disable-LargeSendOffload {
+    Write-Host "`nDisabling Large Send Offload..." -ForegroundColor Yellow
+    Disable-NetAdapterLso -Name "*" -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Large Send Offload disabled" -ForegroundColor Green
+}
+
+# UI TWEAKS
+
 function Restore-ClassicContextMenu {
     Write-Host "`nRestoring classic right-click menu..." -ForegroundColor Yellow
-    
-    New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Out-Null
+    if (!(Test-Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32")) {
+        New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Out-Null
+    }
     Set-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Name "(default)" -Value "" -Force
-    
     Write-Host "  [✓] Classic context menu restored (restart Explorer)" -ForegroundColor Green
 }
 
 function Disable-Widgets {
     Write-Host "`nDisabling Widgets and News Feed..." -ForegroundColor Yellow
-    
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name TaskbarDa -Value 0 -ErrorAction SilentlyContinue
-    
     Write-Host "  [✓] Widgets disabled" -ForegroundColor Green
 }
 
-function Run-AllTweaks {
-    Write-Host "`n========== RUNNING ALL TWEAKS ==========" -ForegroundColor Magenta
+function Remove-ChatIcon {
+    Write-Host "`nRemoving Chat icon from taskbar..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name TaskbarMn -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Chat icon removed" -ForegroundColor Green
+}
+
+function Show-FileExtensions {
+    Write-Host "`nShowing file extensions..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name HideFileExt -Value 0 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] File extensions enabled" -ForegroundColor Green
+}
+
+function Show-HiddenFiles {
+    Write-Host "`nShowing hidden files..." -ForegroundColor Yellow
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name Hidden -Value 1 -ErrorAction SilentlyContinue
+    Write-Host "  [✓] Hidden files visible" -ForegroundColor Green
+}
+
+# ALL-IN-ONE FUNCTIONS
+
+function Run-PerformanceTweaks {
+    Write-Host "`n========== RUNNING PERFORMANCE TWEAKS ==========" -ForegroundColor Magenta
     Disable-UnnecessaryServices
     Optimize-VisualEffects
     Disable-Telemetry
@@ -160,9 +429,59 @@ function Run-AllTweaks {
     Disable-BackgroundApps
     Clean-TempFiles
     Disable-GameBar
+    Kill-BackgroundProcesses
+    Write-Host "`n========== PERFORMANCE TWEAKS COMPLETE ==========" -ForegroundColor Magenta
+}
+
+function Run-AllTweaks {
+    Write-Host "`n========== RUNNING ALL TWEAKS ==========" -ForegroundColor Magenta
+    
+    # Performance
+    Disable-UnnecessaryServices
+    Optimize-VisualEffects
+    Disable-Telemetry
+    Disable-SearchIndexing
+    Set-HighPerformancePower
+    Disable-BackgroundApps
+    Clean-TempFiles
+    Disable-GameBar
+    Kill-BackgroundProcesses
+    
+    # Advanced
+    Disable-WindowsAnimations
+    Disable-Transparency
+    Disable-Cortana
+    Disable-OneDrive
+    Disable-Hibernation
+    Optimize-SSD
+    Disable-PrintSpooler
+    Disable-ErrorReporting
+    Disable-RemoteAssistance
+    
+    # Keyboard & Mouse
+    Disable-StickyKeys
+    Disable-FilterKeys
+    Disable-ToggleKeys
+    Set-KeyboardRepeatRate
+    Disable-MouseAcceleration
+    Set-MouseSpeed
+    
+    # Internet
+    Optimize-DNSCache
+    Disable-NetworkThrottling
+    Optimize-TCPIP
+    Set-GoogleDNS
+    Disable-LargeSendOffload
+    
+    # UI
     Restore-ClassicContextMenu
     Disable-Widgets
+    Remove-ChatIcon
+    Show-FileExtensions
+    Show-HiddenFiles
+    
     Write-Host "`n========== ALL TWEAKS COMPLETE ==========" -ForegroundColor Magenta
+    Write-Host "Please restart your computer for all changes to take effect!" -ForegroundColor Yellow
 }
 
 function Restore-Defaults {
@@ -171,11 +490,23 @@ function Restore-Defaults {
     # Re-enable services
     Set-Service -Name "SysMain" -StartupType Automatic -ErrorAction SilentlyContinue
     Set-Service -Name "WSearch" -StartupType Automatic -ErrorAction SilentlyContinue
+    Set-Service -Name "wuauserv" -StartupType Automatic -ErrorAction SilentlyContinue
     
     # Reset power plan
     powercfg -setactive 381b4222-f694-41f0-9685-ff5bb260df2e
     
-    Write-Host "  [✓] Default settings restored (some changes require restart)" -ForegroundColor Green
+    # Re-enable hibernation
+    powercfg -h on
+    
+    # Reset mouse acceleration
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseSpeed -Value 1 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseThreshold1 -Value 6 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name MouseThreshold2 -Value 10 -ErrorAction SilentlyContinue
+    
+    # Re-enable transparency
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name EnableTransparency -Value 1 -ErrorAction SilentlyContinue
+    
+    Write-Host "  [✓] Default settings restored (restart required)" -ForegroundColor Green
 }
 
 # Main script
@@ -188,9 +519,10 @@ if (-not (Test-Admin)) {
 
 do {
     Show-Menu
-    $choice = Read-Host "`nEnter your choice (0-13)"
+    $choice = Read-Host "`nEnter your choice (0-99)"
     
     switch ($choice) {
+        # Performance Tweaks
         '1' { Disable-UnnecessaryServices }
         '2' { Disable-StartupPrograms }
         '3' { Optimize-VisualEffects }
@@ -200,10 +532,50 @@ do {
         '7' { Disable-BackgroundApps }
         '8' { Clean-TempFiles }
         '9' { Disable-GameBar }
-        '10' { Restore-ClassicContextMenu }
-        '11' { Disable-Widgets }
-        '12' { Run-AllTweaks }
-        '13' { Restore-Defaults }
+        '10' { Kill-BackgroundProcesses }
+        
+        # Advanced Tweaks
+        '11' { Disable-WindowsAnimations }
+        '12' { Disable-Transparency }
+        '13' { Disable-Cortana }
+        '14' { Disable-OneDrive }
+        '15' { Set-WindowsUpdateManual }
+        '16' { Disable-Hibernation }
+        '17' { Optimize-SSD }
+        '18' { Disable-PrintSpooler }
+        '19' { Disable-ErrorReporting }
+        '20' { Disable-RemoteAssistance }
+        
+        # Keyboard & Mouse
+        '21' { Disable-StickyKeys }
+        '22' { Disable-FilterKeys }
+        '23' { Disable-ToggleKeys }
+        '24' { Set-KeyboardRepeatRate }
+        '25' { Disable-MouseAcceleration }
+        '26' { Set-MouseSpeed }
+        
+        # Internet Tweaks
+        '27' { Optimize-DNSCache }
+        '28' { Disable-NetworkThrottling }
+        '29' { Optimize-TCPIP }
+        '30' { Disable-AutoTuning }
+        '31' { Set-GoogleDNS }
+        '32' { Disable-LargeSendOffload }
+        
+        # UI Tweaks
+        '33' { Restore-ClassicContextMenu }
+        '34' { Disable-Widgets }
+        '35' { Remove-ChatIcon }
+        '36' { Show-FileExtensions }
+        '37' { Show-HiddenFiles }
+        
+        # All-in-One
+        '88' { Run-PerformanceTweaks }
+        '99' { Run-AllTweaks }
+        
+        # Restore
+        '90' { Restore-Defaults }
+        
         '0' { 
             Write-Host "`nExiting THVO Tweaks..." -ForegroundColor Cyan
             Start-Sleep -Seconds 1
